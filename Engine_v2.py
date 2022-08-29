@@ -1,5 +1,3 @@
-import numpy as np
-
 class Move():
     def __init__(self, pieceCaptured, startRow, startColumn, endRow, endColumn, isPromotion):
         self.pieceCaptured = pieceCaptured
@@ -9,9 +7,10 @@ class Move():
         self.endColumn = endColumn
         self.isPromotion = isPromotion
         
+        
 class gameState():
     def __init__(self):
-        self.board = np.array([
+        self.board = [
             ["bR", "bN", "bB", "bQ", "bK", "bB", "bN", "bR"],
             ["bp", "bp", "bp", "bp", "bp", "bp", "bp", "bp"],
             ["--", "--", "--", "--", "--", "--", "--", "--"],
@@ -19,7 +18,7 @@ class gameState():
             ["--", "--", "--", "--", "--", "--", "--", "--"],
             ["--", "--", "--", "--", "--", "--", "--", "--"],
             ["wp", "wp", "wp", "wp", "wp", "wp", "wp", "wp"],
-            ["wR", "wN", "wB", "wQ", "wK", "wB", "wN", "wR"]])
+            ["wR", "wN", "wB", "wQ", "wK", "wB", "wN", "wR"]]
 
         self.whiteTurn = True
         self.moveLog = []
@@ -51,16 +50,16 @@ class gameState():
 
     def validMoves(self):
         moves = self.allMoves()
-        if len(moves) == 0:
-            if self.whiteInCheck or self.blackInCheck:
-                self.checkmate = True
-            else:
-                self.stalemate = True
         
         for i in range(len(moves)-1, -1, -1):
             move = moves[i]
             if self.isCheck(move):
                 moves.remove(move)
+        if len(moves) == 0:
+            if self.whiteInCheck or self.blackInCheck:
+                self.checkmate = True
+            else:
+                self.stalemate = True
         return(moves)
         
     
@@ -83,7 +82,14 @@ class gameState():
                 piece = "bp"
         else:
             piece = self.board[move.endRow][move.endColumn]
-            
+        if not self.whiteTurn and self.blackInCheck:
+            self.blackInCheck = False
+            self.checkmate = False
+            self.stalemate = False
+        if self.whiteTurn and self.whiteInCheck:
+            self.whiteInCheck = False
+            self.checkmate = False
+            self.stalemate = False
         self.board[move.startRow][move.startColumn] = piece
         self.board[move.endRow][move.endColumn] = move.pieceCaptured
         self.whiteTurn = not self.whiteTurn
