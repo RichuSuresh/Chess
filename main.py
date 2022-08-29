@@ -37,9 +37,10 @@ moves = gameState.validMoves()
 sqSelected = ()
 clickQueue = []
 running = True
+AImode = True   #change this to False for PVP or True for Player vs Computer
 moveMade = False
 promotion = False
-won = False
+endGame = False
 while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -74,7 +75,18 @@ while running:
                         moveFound = True
                         gameState.move(move)
                         moves = gameState.validMoves()
-                        moveMade = True
+                        if len(moves) == 0:
+                            if gameState.checkmate:
+                                if gameState.whiteTurn:
+                                    print("checkmate, black wins")
+                                else:
+                                    print("checkmate, white wins")
+ 
+                            elif gameState.stalemate:
+                                print("stalemate")
+                            endGame = True
+                        if AImode:
+                            moveMade = True
                         promotion = False
                     else:
                         i += 1
@@ -84,11 +96,10 @@ while running:
             if event.key == pygame.K_z:
                 gameState.undoMove()
                 moves = gameState.validMoves()
-                print(gameState.blackInCheck)
                 moveMade = False
                 
             
-    if moveMade == True and won == False:
+    if moveMade == True and endGame == False:
         bestMove = AI.movefinder(gameState, moves)
         gameState.move(bestMove)
         moveMade = False
@@ -99,10 +110,10 @@ while running:
                     print("checkmate, black wins")
                 else:
                     print("checkmate, white wins")
-                won = True
+
             elif gameState.stalemate:
                 print("stalemate")
-                won = True
+            endGame = True
     
 
     drawBoard(screen, gameState.board)
