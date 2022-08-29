@@ -59,7 +59,7 @@ piecePosDict = {"K":kingPositions, "Q":queenPositions, "R":rookPositions, "B":bi
 checkmate = 1000
 stalemate = 0
 
-maxDepth = 3
+maxDepth = 2
 
 
                  
@@ -69,13 +69,12 @@ maxDepth = 3
 def movefinder(gameState, moves):
     global bestMove
     random.shuffle(moves)
+    bestMove = moves[0]
     minmax(gameState, moves, gameState.whiteTurn, maxDepth, -1000, 1000)
-    print(bestMove)
     return (bestMove)
 
 def minmax(gameState, moves, whiteTurn, depth, alpha, beta):
     global bestMove
-    
     if depth == 0:
         return totalScore(gameState)
             
