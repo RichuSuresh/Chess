@@ -11,12 +11,13 @@ pygame.display.set_caption("chess")
 clock = pygame.time.Clock()
 images = {}
 
+#loads images from images folder
 def loadImages():
     pieces = ["bR", "bN", "bB", "bQ", "bK", "bp", "wp", "wR", "wN", "wB", "wQ", "wK"]
     for piece in pieces:
         images[piece] = pygame.transform.scale(pygame.image.load("images/" + piece + ".png"), (sqSize, sqSize))
         
-
+#draws the checkered board onto the game window
 def drawBoard(screen, board):
     for r in range(8):
         for c in range(8):
@@ -41,6 +42,8 @@ AImode = True   #change this to False for PVP or True for Player vs Computer
 moveMade = False
 promotion = False
 endGame = False
+
+#main game loop
 while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -57,24 +60,28 @@ while running:
             else:
                 sqSelected = (row, col)
                 clickQueue.append(sqSelected)
+            #player needs to click a space with their space, then click the space they wish to move the piece into
             if len(clickQueue) == 2:
                 piece = gameState.board[clickQueue[0][0]][clickQueue[0][1]]
                 pieceCaptured = gameState.board[clickQueue[1][0]][clickQueue[1][1]]
                 promotion = False
+                #checks whether a move is a pawn promotion move
                 if piece == "wp" and sqSelected[0] == 0:
                     promotion = True
                 if piece == "bp" and sqSelected[0] == 7:
                     promotion = True
-                move = Engine.Move(pieceCaptured, clickQueue[0][0], clickQueue[0][1], clickQueue[1][0], clickQueue[1][1], promotion)
-                moveID = (move.startRow, move.startColumn, move.endRow, move.endColumn)
+                move = Engine.Move(pieceCaptured, clickQueue[0][0], clickQueue[0][1], clickQueue[1][0], clickQueue[1][1], promotion) 
+                moveID = (move.startRow, move.startColumn, move.endRow, move.endColumn) #generates a moveID used to check whether the move is a valid move
                 moveFound = False
                 i = 0
+                #searches through the valid moves array to check whether the player has made a valid move
                 while not moveFound and i != len(moves):
                     compMoveID = (moves[i].startRow, moves[i].startColumn, moves[i].endRow, moves[i].endColumn)
                     if compMoveID == moveID:
                         moveFound = True
                         gameState.move(move)
                         moves = gameState.validMoves()
+                        #if there are no valid moves, then a checkmate or stalemate has occured
                         if len(moves) == 0:
                             if gameState.checkmate:
                                 if gameState.whiteTurn:
@@ -92,13 +99,14 @@ while running:
                         i += 1
                 sqSelected = ()
                 clickQueue = []
+        #if the player presses the z key, the most recent move is undone
         elif event.type == pygame.KEYDOWN:
             if event.key == pygame.K_z:
                 gameState.undoMove()
                 moves = gameState.validMoves()
                 moveMade = False
                 
-            
+    #AI code
     if moveMade == True and endGame == False:
         bestMove = AI.movefinder(gameState, moves)
         gameState.move(bestMove)
