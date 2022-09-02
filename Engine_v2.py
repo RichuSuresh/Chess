@@ -1,3 +1,4 @@
+#move class which contains attributes to do with the move a player has mode. For easy access to all move information when manipulating them
 class Move():
     def __init__(self, pieceCaptured, startRow, startColumn, endRow, endColumn, isPromotion):
         self.pieceCaptured = pieceCaptured
@@ -26,7 +27,8 @@ class gameState():
         self.checkmate = False
         self.blackInCheck = False
         self.whiteInCheck = False
-
+    
+    #generates all moved
     def allMoves(self):
         moves = []
         self.blackInCheck = False
@@ -47,14 +49,17 @@ class gameState():
                     if self.board[i][j][1] == 'Q':
                         self.queenMoves(i, j, moves)
         return(moves)
-
+       
+    #filters out all of the valid moves from the moved generated in the method above
     def validMoves(self):
         moves = self.allMoves()
         
+        #this loop makes a move, then checks whether the king is in check after making that move. If this is the case, then the move is invalid and removed.
         for i in range(len(moves)-1, -1, -1):
             move = moves[i]
             if self.isCheck(move):
                 moves.remove(move)
+        #checks whether the game has ended
         if len(moves) == 0:
             if self.whiteInCheck or self.blackInCheck:
                 self.checkmate = True
@@ -62,7 +67,7 @@ class gameState():
                 self.stalemate = True
         return(moves)
         
-    
+    #method that checks for whether a specific move (passed in as a paramater) leaves the king in check or not
     def isCheck(self, move):
         self.move(move)
         self.allMoves()
@@ -72,9 +77,10 @@ class gameState():
         self.undoMove()
         return False
         
-        
+    #reverses the latest a move a player has made
     def undoMove(self):
         move = self.moveLog.pop()
+        #unpromotes a pawn if the move was a promotion move
         if move.isPromotion:
             if not self.whiteTurn:
                 piece = "wp"
@@ -82,6 +88,7 @@ class gameState():
                 piece = "bp"
         else:
             piece = self.board[move.endRow][move.endColumn]
+        #sets the check flags off if a check has occured due to a move.
         if not self.whiteTurn and self.blackInCheck:
             self.blackInCheck = False
             self.checkmate = False
@@ -90,11 +97,14 @@ class gameState():
             self.whiteInCheck = False
             self.checkmate = False
             self.stalemate = False
+        #reverts the piece's position
         self.board[move.startRow][move.startColumn] = piece
         self.board[move.endRow][move.endColumn] = move.pieceCaptured
         self.whiteTurn = not self.whiteTurn
-        
+    
+    #method that allows the player to make a move
     def move(self, move):
+        #checks whether the move is a promotion, if this is the case, turn the pawn into a queen piece
         if move.isPromotion:
             if self.whiteTurn:
                 piece = "wQ"
@@ -106,7 +116,8 @@ class gameState():
         self.board[move.endRow][move.endColumn] = piece
         self.board[move.startRow][move.startColumn] = "--"      
         self.whiteTurn = not self.whiteTurn
-        
+    
+    #generates all moves that can be made a specified pawn piece
     def pawnMoves(self, row, column, moves):
         promotion = False
         if self.whiteTurn:
@@ -177,6 +188,7 @@ class gameState():
                     move = Move(self.board[row+1][column+1], row, column, row + 1, column+1, promotion)
                     moves.append(move)
                     
+    #generates all moves that can be made a specified rook piece                
     def rookMoves(self, row, column, moves):  
         self.obstructedUp = False
         self.obstructedDown = False
@@ -297,7 +309,8 @@ class gameState():
                         moves.append(move)
 
             self.counter += 1
-                    
+            
+   #generates all moves that can be made a specified knight piece                 
     def knightMoves(self, row, column, moves):
         if row + 2 <= 7:       
             if column - 1 >= 0:
@@ -409,7 +422,8 @@ class gameState():
                     if self.board[row-1][column+2][0] == "w" or self.board[row-1][column+2] == "--":
                         move = Move(self.board[row-1][column+2], row, column, row-1, column+2, False) 
                         moves.append(move)
-
+                        
+    #generates all moves that can be made a specified bishop piece
     def bishopMoves(self, row, column, moves):
         TRobst = False
         TLobst = False
@@ -502,7 +516,8 @@ class gameState():
                 else:
                     TLobst = True
             i += 1
-
+            
+    #generates all moves that can be made a specified pawn piece
     def queenMoves(self, row, column, moves):
         TRobst = False
         BRobst = False
@@ -676,7 +691,7 @@ class gameState():
                     Robst = True
                         
             i += 1
-
+    #generates all moves that can be made by a king piece
     def kingMoves(self, row, column, moves):
         if (row + 1) <= 7:
             space = self.board[row+1][column]
