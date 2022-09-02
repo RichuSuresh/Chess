@@ -28,7 +28,7 @@ class gameState():
         self.blackInCheck = False
         self.whiteInCheck = False
     
-    #generates all moved
+    #generates all moves
     def allMoves(self):
         moves = []
         self.blackInCheck = False
